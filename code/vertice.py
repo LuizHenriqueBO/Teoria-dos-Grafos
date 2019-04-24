@@ -49,7 +49,9 @@ class Vertice(object):
 
 
 
-
+    def get_nome(self):
+        return self.nome
+        
     def get_cor(self):
         return self.cor
 

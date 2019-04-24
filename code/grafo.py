@@ -12,24 +12,40 @@ class Grafo(object):
         self.lista_vertice.append(vert)
         return vert
 
+    # verificar se pode mais de uma aresta no mesmo origem e destino
     def add_aresta(self, nome, origem, destino, valor=0):
-        v_origem = self.get_vertice(origem)
-        v_destino = self.get_vertice(destino)
+        
+        if(self.get_aresta(nome) == None):
+        
+            v_origem = self.get_vertice(origem)
+            v_destino = self.get_vertice(destino)
 
-        if(v_origem is None):
-            v_origem = self.add_vertice(origem)
-        
-        if(v_destino is None):
-            v_destino = self.add_vertice(destino)
-        
-        
-        arest = Aresta(nome, valor, v_origem, v_destino)
-        self.lista_aresta.append(arest)
+            if(v_origem is None):
+                v_origem = self.add_vertice(origem)
+            
+            if(v_destino is None):
+                v_destino = self.add_vertice(destino)
+    
+            arest = Aresta(nome, valor, v_origem, v_destino)
+            self.lista_aresta.append(arest)
+
+            return True
+
+        return False
+
+
+    def get_aresta(self, nome):
+        for arest in self.lista_aresta:
+            if arest.get_nome() == nome:
+                return arest
+        return None
+
+
 
 
     def get_vertice(self, nome):
         for vert in self.lista_vertice:
-            if vert.nome == nome:
+            if vert.get_nome() == nome:
                 return vert
         return None
     
@@ -60,9 +76,12 @@ class Grafo(object):
 
 
 
+
 g = Grafo()
 g.add_aresta('a1','A','B',10)
 g.add_aresta('a2','A','C',5)
 g.add_aresta('a3','A','D',1)
 g.add_aresta('a4','B','D',20)
+g.add_aresta('a5','B','A',15)
+g.add_aresta('a1','D','C',11)
 print(str(g))
