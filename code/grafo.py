@@ -106,43 +106,35 @@ class Grafo(object):
 
 
     def verificacao_recursiva(self, lista_vert, vertice_origem, lista_visitados):
-        
         if(vertice_origem == None): # verifica se o vertice de origem existe            
             return
         lis_aresta = self.get_aresta_vertice(vertice_origem.get_vertice_nome()) # pegando todas as aresta do vertice de origem
         if( lis_aresta == None ) and ( lista_vert == None ): # verifico se ja acabou a lista de aresta e de vertices, então retorna os vertices encontrados
-            return
+           return
         if( lis_aresta == None ) and ( lista_vert != None ): # se minha lista de aresta for vazia e ainda tenho vertice, então é falso
             return
         if vertice_origem in lista_vert:
+            lista_visitados.append(vertice_origem)
             lista_vert.remove(vertice_origem)
-        lista_visitados.append(vertice_origem)                
         for arest in lis_aresta:
-            if(lis_aresta[0].get_aresta_destino().get_vertice_cor() == 'preto'):
-                del lis_aresta[0]
-            else:
-                lis_aresta[0].get_aresta_origem().set_vertice_cor('preto')
-                self.verificacao_recursiva(lista_vert, arest.get_aresta_destino(), lista_visitados) # chama a recursão
+            #print(arest.get_aresta_nome()) 
+            self.verificacao_recursiva(lista_vert, arest.get_aresta_destino(), lista_visitados) # chama a recursão
         return lista_visitados
 
 
-
     def is_conexo(self):
-        lista_vert = self.lista_vertice[:]
-        list_v = []
-        for vert in lista_vert:
+        for vert in self.lista_vertice:
             lista_visitados = []
-            list_v = self.verificacao_recursiva(lista_vert, vert, lista_visitados )
-            for i in list_v:
+            lista_vert = self.lista_vertice[:]
+            self.verificacao_recursiva(lista_vert, vert, lista_visitados )
+            
+            for i in lista_visitados:
                 if i in lista_vert:
                     lista_vert.remove(i)
                 
             if lista_vert == []:
                 return True
-            lista_vert = self.lista_vertice[:]
         return False
-
-
 
 
 
@@ -152,6 +144,13 @@ class Grafo(object):
         for aresta in l_aresta:
             lista_vert.append(aresta.get_aresta_destino().get_vertice_nome())
         return lista_vert
+
+    # def is_arvore(self):
+    #     if(self.is_conexo() == True){
+
+
+
+    #     }
 
 
 
@@ -170,6 +169,8 @@ g.add_aresta('a1','A','B',10)
 # g.add_aresta('a4','B','A',10)
 g.add_aresta('a5','B','C',10)
 g.add_aresta('a6','B','D',10)
+g.add_aresta('a7','E','A',10)
+
 
 # g.add_aresta('a7','C','A',10)
 # g.add_aresta('a8','C','B',10)
