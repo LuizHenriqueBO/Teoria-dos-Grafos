@@ -49,11 +49,29 @@ class Grafo(object):
         return None
 
 
-    def get_aresta_vertice(self, nome_vertice):
-        lista_arest = []
-        for i in self.lista_aresta:
+    def get_aresta_vertice_origem(self, nome_vertice, lista_aresta=[]):
+        if lista_aresta == []:
+            lista_aresta = self.lista_aresta
+        l_arest = []
+        for i in lista_aresta:
             if i.get_aresta_origem().get_vertice_nome() == nome_vertice:
-                lista_arest.append(i)
+                l_arest.append(i)
+        return l_arest
+
+    def get_aresta_vertice_destino(self, nome_vertice, lista_aresta=[]):
+        if lista_aresta == []:
+            lista_aresta = self.lista_aresta
+        l_arest = []
+        for i in lista_aresta:
+            if i.get_aresta_destino().get_vertice_nome() == nome_vertice:
+                l_arest.append(i)
+        return l_arest
+
+
+    def get_aresta_vertice_all(self, nome_vertice):
+        lista_arest = []
+        lista_arest.append(self.get_aresta_vertice_destino(nome_vertice))
+        lista_arest.append(self.get_aresta_vertice_origem(nome_vertice))
         return lista_arest
 
 
@@ -63,7 +81,7 @@ class Grafo(object):
             resultado.append(vert.get_vertice_nome())
             resultado.append(" : ")
             arestas = []
-            for arest in self.get_aresta_vertice(vert.get_vertice_nome()):
+            for arest in self.get_aresta_vertice_origem(vert.get_vertice_nome()):
                 arestas.append("(")
                 arestas.append("".join(arest.get_aresta_nome()))
                 arestas.append(")")
@@ -89,7 +107,7 @@ class Grafo(object):
 
     # # retorna o grau de um vertice
     def get_grau(self, vertice):
-        return len(self.get_aresta_vertice(vertice))
+        return len(self.get_aresta_vertice_origem(vertice))
 
     def get_vertices(self):
         return [vert.get_vertice_nome() for vert in self.lista_vertice]
@@ -104,34 +122,42 @@ class Grafo(object):
         return True
 
 
-
-    def verificacao_recursiva(self, lista_vert, vertice_origem, lista_visitados):
-        if(vertice_origem == None): # verifica se o vertice de origem existe            
+    def verificacao_recursiva_conexo(self, lista_vert, lista_arest, vertice_origem, aresta_origem, lista_visitados):
+        if(vertice_origem == None): # verifica se o vertice de origem existe
             return
-        lis_aresta = self.get_aresta_vertice(vertice_origem.get_vertice_nome()) # pegando todas as aresta do vertice de origem
-        if( lis_aresta == None ) and ( lista_vert == None ): # verifico se ja acabou a lista de aresta e de vertices, então retorna os vertices encontrados
+        lis_aresta_origem = self.get_aresta_vertice_destino(vertice_origem.get_vertice_nome(), lista_arest) # pegando todas as aresta do vertice de origem
+        lis_aresta_destino = self.get_aresta_vertice_origem(vertice_origem.get_vertice_nome(), lista_arest) # pegando todas as aresta do vertice de origem      
+        if( lis_aresta_destino == [] ) and ( lista_vert == [] ): # verifico se ja acabou a lista de aresta e de vertices, então retorna os vertices encontrados
            return
-        if( lis_aresta == None ) and ( lista_vert != None ): # se minha lista de aresta for vazia e ainda tenho vertice, então é falso
-            return
-        if vertice_origem in lista_vert:
+        if aresta_origem in lista_arest:
+            lista_arest.remove(aresta_origem)
+
+        if vertice_origem not in lista_visitados:
             lista_visitados.append(vertice_origem)
+
+        if (len(lis_aresta_destino) == 1):
             lista_vert.remove(vertice_origem)
-        for arest in lis_aresta:
-            #print(arest.get_aresta_nome()) 
-            self.verificacao_recursiva(lista_vert, arest.get_aresta_destino(), lista_visitados) # chama a recursão
+
+        for arest in lis_aresta_destino:
+            if(arest.get_aresta_destino() in lista_vert):
+                self.verificacao_recursiva_conexo(lista_vert, lista_arest, arest.get_aresta_destino(), arest, lista_visitados) # chama a recursão
         return lista_visitados
+
 
 
     def is_conexo(self):
         for vert in self.lista_vertice:
             lista_visitados = []
             lista_vert = self.lista_vertice[:]
-            self.verificacao_recursiva(lista_vert, vert, lista_visitados )
+            lista_arest = self.lista_aresta[:]
+            self.verificacao_recursiva_conexo(lista_vert, lista_arest, vert, None, lista_visitados )
             
             for i in lista_visitados:
+                #print(i.get_vertice_nome())
                 if i in lista_vert:
                     lista_vert.remove(i)
-                
+            #print("\n")
+             
             if lista_vert == []:
                 return True
         return False
@@ -139,11 +165,34 @@ class Grafo(object):
 
 
     def get_adjacentes(self, nome_vertice):
-        l_aresta = self.get_aresta_vertice(nome_vertice)
+        l_aresta = self.get_aresta_vertice_origem(nome_vertice)
         lista_vert = []
         for aresta in l_aresta:
             lista_vert.append(aresta.get_aresta_destino().get_vertice_nome())
         return lista_vert
+
+
+
+    # def verificacao_recursiva_arvore(self, lista_vert, vertice_origem, lista_visitados):
+
+    #         if(vertice_origem == None): # verifica se o vertice de origem existe            
+    #             return 
+    #         lis_aresta = self.get_aresta_vertice_origem(vertice_origem.get_vertice_nome()) # pegando todas as aresta do vertice de origem
+    #         if( lis_aresta == None ) and ( lista_vert == None ): # verifico se ja acabou a lista de aresta e de vertices, então retorna os vertices encontrados
+    #             return
+    #         if( lis_aresta == None ) and ( lista_vert != None ): # se minha lista de aresta for vazia e ainda tenho vertice, então é falso
+    #             return
+    #         if vertice_origem in lista_vert:
+    #             lista_visitados.append(vertice_origem)
+    #             print("removendo o vertice: ",vertice_origem.get_vertice_nome())
+    #             lista_vert.remove(vertice_origem)
+    #         for arest in lis_aresta:
+    #             #print(arest.get_aresta_nome())
+    #             if(arest.get_aresta_destino()):
+    #                 self.verificacao_recursiva_arvore(lista_vert, arest.get_aresta_destino(), lista_visitados) # chama a recursão
+    #         return lista_visitados
+
+
 
     # def is_arvore(self):
     #     if(self.is_conexo() == True){
@@ -167,29 +216,29 @@ g.add_aresta('a1','A','B',10)
 # g.add_aresta('a3','A','D',10)
 
 # g.add_aresta('a4','B','A',10)
-g.add_aresta('a5','B','C',10)
-g.add_aresta('a6','B','D',10)
-g.add_aresta('a7','E','A',10)
+g.add_aresta('a2','B','C',10)
+g.add_aresta('a3','B','D',10)
+g.add_aresta('a4','E','C',10)
 
 
-# g.add_aresta('a7','C','A',10)
-# g.add_aresta('a8','C','B',10)
+g.add_aresta('a5','C','A',10)
+g.add_aresta('a6','C','B',10)
 # g.add_aresta('a9','C','D',10)
 
-# g.add_aresta('a10','D','A',10)
-# g.add_aresta('a11','D','B',10)
-# g.add_aresta('a12','D','C',10)
+g.add_aresta('a10','D','A',10)
+g.add_aresta('a11','D','B',10)
+g.add_aresta('a12','D','C',10)
 
 
 
-print(g.is_completo())
+#print(g.is_completo())
 
 print(g.is_conexo())
-print(g.get_vertices()) 
+#print(g.get_vertices()) 
 
-print(g.get_ordem()) # imprime a ordem
-print(g.get_grau('A')) # imprime o grau dos vertices
-print(g.get_adjacentes('B'))
+#print(g.get_ordem()) # imprime a ordem
+#print(g.get_grau('A')) # imprime o grau dos vertices
+#print(g.get_adjacentes('B'))
 #g.add_aresta('a1','D','C',11) # (adicionar aresta de mesmo nome)ISSO NÃO PODE ACONTECER !, ok funcionando! 
 
 #g.add_aresta('a50','A','B',30) # (adicionar mais de uma aresta pra o mesmo origem e destino )ISSO NÃO PODE ACONTECER !, ok funcionando!
