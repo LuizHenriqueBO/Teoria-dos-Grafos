@@ -19,7 +19,7 @@ class Aresta(object):
         self.origem = origem
 
     def set_aresta_destino(self, destino):
-        self.destino = destino    
+        self.destino = destino
 
 
 
